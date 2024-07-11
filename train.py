@@ -21,8 +21,8 @@ num_epochs = 5
 image_size = 128
 nc = 3 # num channels
 nz = 100 # size of latent vector
-ngf = 128 # num feature maps in generator
-ndf = 128 # num feature maps in the discriminator
+ngf = 64 # num feature maps in generator
+ndf = 64 # num feature maps in the discriminator
 lr = 0.0002
 
 dataset = torchvision.datasets.ImageFolder(
@@ -64,20 +64,46 @@ iters = 0
 print("Starting Training...")
 for epoch in range(num_epochs):
     for i, data in enumerate(dataloader, 0):
+        # each 'data' entry is 128 images * 3 channels * 128 * 128
         # train the discriminator: try to maximize log(D(x)) + log(1-D(G(z)))
-        real_img = data[0]
-        label = torch.full((real_img.size(0),), real_label, dtype=torch.float)
-        output = discriminator(real_img)
-        dx = criterion(output, label)
-        print(dx)
-        break
+        discriminator.zero_grad()
+        # train with real images
+        real_imgs = data[0]
+        label = torch.full((real_imgs.size(0),), real_label, dtype=torch.float)
+        output = discriminator(real_imgs).view(-1)
+        lossd_real = criterion(output, label)
+        lossd_real.backward()
         
-    break
+        D_x = output.mean().item()
+        
+        # train with fake images
+        noise = torch.randn(real_imgs.size(0), nz, 1, 1)
+        fake_imgs = generator(noise)
+        label.fill_(fake_label) # update the labels
+        output = discriminator(fake_imgs.detach()).view(-1)
+        lossd_fake = criterion(output, label)
+        lossd_fake.backward()
+        
+        D_G_z1 = output.mean().item()
+        
+        lossd = lossd_fake + lossd_real
+        optimizerD.step()
         
         
+        # train the generator: try to maximize log(D(G(z)))
+        generator.zero_grad()
+        label.fill_(real_label)
+        output = discriminator(fake_imgs).view(-1)
+        lossg = criterion(output, label)
+        lossg.backward()
+        D_G_z2 = lossg.mean().item()
         
+        optimizerG.step()
         
+        if i % 10 == 0:
+            print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f' % (epoch, num_epochs, i, len(dataloader), lossd.item(), lossg.item(), D_x, D_G_z1, D_G_z2))
         
+        gen_losses.append(lossg.item())
+        disc_losses.append(lossd.item())
         
-
 

@@ -54,6 +54,7 @@ class Generator(nn.Module):
         return self.layers(x)
         
 
+
 class Discriminator(nn.Module):
     def __init__(self, num_channels, d_features):
         super(Discriminator, self).__init__()
@@ -76,9 +77,14 @@ class Discriminator(nn.Module):
             nn.Conv2d(d_features*4, d_features*8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d_features*8),
             nn.LeakyReLU(0.2, inplace=True),
-            # Output is (N, d_features*8, 4, 4)
+            # Output is (N, d_features*8, 8, 8)
             
-            nn.Conv2d(d_features*8, 1, 4, 1, 0, bias=False),
+            nn.Conv2d(d_features*8, d_features*16, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(d_features*16),
+            nn.LeakyReLU(0.2, inplace=True),
+            # Output is (N, d_features*16, 4, 4)
+            
+            nn.Conv2d(d_features*16, 1, 4, 1, 0, bias=False),
             nn.Sigmoid()
             # Output is (N, 1, 1, 1)
         )
