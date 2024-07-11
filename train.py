@@ -11,18 +11,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from model import init_weights
-from model import Generator 
+from model import Generator, Discriminator
 
 data = "dataset/"
 
 # hyperparameters
 batch_size = 128
 num_epochs = 5
-image_size = 512
+image_size = 128
 nc = 3 # num channels
 nz = 100 # size of latent vector
-ngf = 64 # num feature maps in generator
-ndf = 64 # num feature maps in the discriminator
+ngf = 128 # num feature maps in generator
+ndf = 128 # num feature maps in the discriminator
 lr = 0.0002
 
 dataset = torchvision.datasets.ImageFolder(
@@ -43,4 +43,5 @@ device = torch.device("mps")
 generator = Generator(d_input=nz, d_features=ngf)
 generator.apply(init_weights)
 
-print(generator)
+discriminator = Discriminator(num_channels=nc, d_features=ndf)
+discriminator.apply(init_weights)
