@@ -36,12 +36,48 @@ dataset = torchvision.datasets.ImageFolder(
 )
 
 dataloader = torch.utils.data.DataLoader(dataset, batch_size = batch_size, shuffle=True)
-
 device = torch.device("mps")
 # device = torch.device("cpu")
 
+# setup model
 generator = Generator(d_input=nz, d_features=ngf)
 generator.apply(init_weights)
-
 discriminator = Discriminator(num_channels=nc, d_features=ndf)
 discriminator.apply(init_weights)
+
+# loss function and optimizer
+criterion = nn.BCELoss()
+rand_noise = torch.randn(64, nz, 1, 1)
+
+real_label = 1.
+fake_label = 0.
+
+optimizerG = optim.Adam(generator.parameters(), lr = lr)
+optimizerD = optim.Adam(discriminator.parameters(), lr = lr)
+
+# training loop
+imgs_generated = []
+gen_losses = []
+disc_losses = []
+iters = 0
+
+print("Starting Training...")
+for epoch in range(num_epochs):
+    for i, data in enumerate(dataloader, 0):
+        # train the discriminator: try to maximize log(D(x)) + log(1-D(G(z)))
+        real_img = data[0]
+        label = torch.full((real_img.size(0),), real_label, dtype=torch.float)
+        output = discriminator(real_img)
+        dx = criterion(output, label)
+        print(dx)
+        break
+        
+    break
+        
+        
+        
+        
+        
+        
+
+
