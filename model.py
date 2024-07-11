@@ -25,29 +25,25 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
         self.layers = nn.Sequential(
             # input z is shape d_input
-            nn.ConvTranspose2d(d_input, d_features*16, 4, 1, 0, bias=False),
-            nn.BatchNorm2d(d_features*16),
-            nn.ReLU(True),
-            # (d_features * 16, 4, 4)
-            nn.ConvTranspose2d(d_features*16, d_features*8, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(d_input, d_features*8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(d_features*8),
             nn.ReLU(True),
-            # (d_features * 8, 8, 8)
+            # (d_features * 8, 4, 4)
             nn.ConvTranspose2d(d_features*8, d_features*4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d_features*4),
             nn.ReLU(True),
-            # (d_features * 4, 16, 16)
+            # (d_features * 4, 8, 8)
             nn.ConvTranspose2d(d_features*4, d_features*2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d_features*2),
             nn.ReLU(True),
-            # (d_features * 2, 32, 32)
+            # (d_features * 2, 16, 16)
             nn.ConvTranspose2d(d_features*2, d_features, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d_features),
             nn.ReLU(True),
-            # (d_features, 64, 64)
+            # (d_features, 32, 32)
             nn.ConvTranspose2d(d_features, 3, 4, 2, 1, bias=False),
             nn.Tanh()
-            # (num_channels (3), 128, 128)
+            # (num_channels (3), 64, 64)
         )
 
     def forward(self, x):
@@ -59,32 +55,27 @@ class Discriminator(nn.Module):
     def __init__(self, num_channels, d_features):
         super(Discriminator, self).__init__()
         self.layers = nn.Sequential(
-            # Input is (N, num_channels, 128, 128)
+            # Input is (N, num_channels, 64, 64)
             nn.Conv2d(num_channels, d_features, 4, 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
-            # Output is (N, d_features, 64, 64)
+            # Output is (N, d_features, 32, 32)
             
             nn.Conv2d(d_features, d_features*2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d_features*2),
             nn.LeakyReLU(0.2, inplace=True),
-            # Output is (N, d_features*2, 32, 32)
+            # Output is (N, d_features*2, 16, 16)
             
             nn.Conv2d(d_features*2, d_features*4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d_features*4),
             nn.LeakyReLU(0.2, inplace=True),
-            # Output is (N, d_features*4, 16, 16)
+            # Output is (N, d_features*4, 8, 8)
             
             nn.Conv2d(d_features*4, d_features*8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d_features*8),
             nn.LeakyReLU(0.2, inplace=True),
-            # Output is (N, d_features*8, 8, 8)
+            # Output is (N, d_features*8, 4, 4)
             
-            nn.Conv2d(d_features*8, d_features*16, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(d_features*16),
-            nn.LeakyReLU(0.2, inplace=True),
-            # Output is (N, d_features*16, 4, 4)
-            
-            nn.Conv2d(d_features*16, 1, 4, 1, 0, bias=False),
+            nn.Conv2d(d_features*8, 1, 4, 1, 0, bias=False),
             nn.Sigmoid()
             # Output is (N, 1, 1, 1)
         )
