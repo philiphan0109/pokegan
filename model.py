@@ -48,7 +48,6 @@ class Generator(nn.Module):
 
     def forward(self, x):
         return self.layers(x)
-        
 
 
 class Discriminator(nn.Module):
