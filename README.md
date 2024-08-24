@@ -1,2 +1,2 @@
-# AARTGAN
-An implementation of PyTorch's DCGAN to generate abstract art.
+# pokegan
+An implementation of PyTorch's DCGAN to generate pokemon cards.
